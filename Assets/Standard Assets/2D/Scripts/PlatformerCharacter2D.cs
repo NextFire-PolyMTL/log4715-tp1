@@ -11,6 +11,7 @@ namespace UnityStandardAssets._2D
         [Range(0, 1)][SerializeField] private float m_CrouchSpeed = .36f;  // Amount of maxSpeed applied to crouching movement. 1 = 100%
         [SerializeField] private bool m_AirControl = false;                 // Whether or not a player can steer while jumping;
         [SerializeField] private LayerMask m_WhatIsGround;                  // A mask determining what is ground to the character
+        [SerializeField] private LayerMask m_WhatIsWall;                    // A mask determining what is wall to the character
         [SerializeField] private int m_MaxJumps = 1;                        // The maximum number of jumps the player can do in the air
 
         private Transform m_GroundCheck;    // A position marking where to check if the player is grounded.
@@ -18,6 +19,9 @@ namespace UnityStandardAssets._2D
         private bool m_Grounded;            // Whether or not the player is grounded.
         private Transform m_CeilingCheck;   // A position marking where to check for ceilings
         const float k_CeilingRadius = .01f; // Radius of the overlap circle to determine if the player can stand up
+        private Transform m_WallCheck;      // A position marking where to check for walls.
+        const float k_WalledRadius = .4f;   // Radius of the overlap circle to determine if the player is against a wall
+        private bool m_Walled;              // Whether or not the player is against a wall.
         private Animator m_Anim;            // Reference to the player's animator component.
         private Rigidbody2D m_Rigidbody2D;
         private bool m_FacingRight = true;  // For determining which way the player is currently facing.
@@ -28,6 +32,7 @@ namespace UnityStandardAssets._2D
             // Setting up references.
             m_GroundCheck = transform.Find("GroundCheck");
             m_CeilingCheck = transform.Find("CeilingCheck");
+            m_WallCheck = transform.Find("WallCheck");
             m_Anim = GetComponent<Animator>();
             m_Rigidbody2D = GetComponent<Rigidbody2D>();
         }
@@ -49,6 +54,14 @@ namespace UnityStandardAssets._2D
 
             // Set the vertical animation
             m_Anim.SetFloat("vSpeed", m_Rigidbody2D.velocity.y);
+
+            m_Walled = false;
+            Collider2D[] colliders2 = Physics2D.OverlapCircleAll(m_WallCheck.position, k_WalledRadius, m_WhatIsWall);
+            for (int i = 0; i < colliders2.Length; i++)
+            {
+                if (colliders2[i].gameObject != gameObject)
+                    m_Walled = true;
+            }
         }
 
 
