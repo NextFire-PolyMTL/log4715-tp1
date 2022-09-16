@@ -6,9 +6,10 @@ namespace UnityStandardAssets._2D
 {
     public class PlatformerCharacter2D : MonoBehaviour
     {
+        [SerializeField] private float m_MoveForce = 50f;                   // Amount of force added to move the player left and right.
         [SerializeField] private float m_MaxSpeed = 10f;                    // The fastest the player can travel in the x axis.
         [SerializeField] private float m_JumpForce = 400f;                  // Amount of force added when the player jumps.
-        [Range(0, 1)][SerializeField] private float m_CrouchSpeed = .36f;  // Amount of maxSpeed applied to crouching movement. 1 = 100%
+        [Range(0, 1)][SerializeField] private float m_CrouchSpeed = .36f;   // Amount of maxSpeed applied to crouching movement. 1 = 100%
         [SerializeField] private bool m_AirControl = false;                 // Whether or not a player can steer while jumping;
         [SerializeField] private LayerMask m_WhatIsGround;                  // A mask determining what is ground to the character
         [SerializeField] private LayerMask m_WhatIsWall;                    // A mask determining what is wall to the character
@@ -86,11 +87,16 @@ namespace UnityStandardAssets._2D
                 // Reduce the speed if crouching by the crouchSpeed multiplier
                 move = (crouch ? move * m_CrouchSpeed : move);
 
-                // The Speed animator parameter is set to the absolute value of the horizontal input.
-                m_Anim.SetFloat("Speed", Mathf.Abs(move));
+                // Move the character by pushing a force into the rigidbody2D.
+                m_Rigidbody2D.AddForce(m_MoveForce * new Vector2(move, 0));
 
-                // Move the character
-                m_Rigidbody2D.velocity = new Vector2(move * m_MaxSpeed, m_Rigidbody2D.velocity.y);
+                // Limit the speed of the character
+                float x_vel = Mathf.Clamp(m_Rigidbody2D.velocity.x, -m_MaxSpeed, m_MaxSpeed);
+                float y_vel = m_Walled ? Mathf.Max(m_WallSpeed, m_Rigidbody2D.velocity.y) : m_Rigidbody2D.velocity.y;
+                m_Rigidbody2D.velocity = new Vector2(x_vel, y_vel);
+
+                // The Speed animator parameter is set to the absolute value of the horizontal input.
+                m_Anim.SetFloat("Speed", Mathf.Abs(x_vel));
 
                 // If the input is moving the player right and the player is facing left...
                 if (move > 0 && !m_FacingRight)
