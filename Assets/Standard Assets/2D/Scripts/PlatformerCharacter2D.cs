@@ -8,6 +8,7 @@ namespace UnityStandardAssets._2D
     {
         [SerializeField] private float m_MoveForce = 50f;                   // Amount of force added to move the player left and right.
         [SerializeField] private float m_MaxSpeed = 10f;                    // The fastest the player can travel in the x axis.
+        [SerializeField] private float m_WallSpeed = -1f;                   // The fastest the player can travel in the y axis on a wall.
         [SerializeField] private float m_JumpForce = 400f;                  // Amount of force added when the player jumps.
         [Range(0, 1)][SerializeField] private float m_CrouchSpeed = .36f;   // Amount of maxSpeed applied to crouching movement. 1 = 100%
         [SerializeField] private bool m_AirControl = false;                 // Whether or not a player can steer while jumping;
@@ -21,7 +22,7 @@ namespace UnityStandardAssets._2D
         private Transform m_CeilingCheck;   // A position marking where to check for ceilings
         const float k_CeilingRadius = .01f; // Radius of the overlap circle to determine if the player can stand up
         private Transform m_WallCheck;      // A position marking where to check for walls.
-        const float k_WalledRadius = .4f;   // Radius of the overlap circle to determine if the player is against a wall
+        const float k_WalledRadius = .5f;   // Radius of the overlap circle to determine if the player is against a wall
         private bool m_Walled;              // Whether or not the player is against a wall.
         private Animator m_Anim;            // Reference to the player's animator component.
         private Rigidbody2D m_Rigidbody2D;
@@ -121,13 +122,19 @@ namespace UnityStandardAssets._2D
                     m_Anim.SetBool("Ground", false);
                     m_JumpsLeft = m_MaxJumps;
                 }
+                if (m_Walled && !m_Grounded)
+                {
+                    m_Rigidbody2D.AddForce(m_JumpForce * new Vector2(m_FacingRight ? -1 : 1, 1));
+                    Flip();
+
+                }
                 // If the player has jumps left...
-                if (m_JumpsLeft > 0)
+                else if (m_JumpsLeft > 0)
                 {
                     // Reset y velocity
                     m_Rigidbody2D.velocity = new Vector2(m_Rigidbody2D.velocity.x, 0);
                     // Add a vertical force to the player.
-                    m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
+                    m_Rigidbody2D.AddForce(Vector2.up * m_JumpForce);
                     // Decrement the number of jumps left
                     m_JumpsLeft--;
                 }
