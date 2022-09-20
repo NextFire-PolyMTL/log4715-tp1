@@ -16,7 +16,7 @@ namespace UnityStandardAssets._2D
         [SerializeField] private LayerMask m_WhatIsGround;                  // A mask determining what is ground to the character
         [SerializeField] private LayerMask m_WhatIsWall;                    // A mask determining what is wall to the character
         [SerializeField] private int m_MaxJumps = 1;                        // The maximum number of jumps the player can do in the air
-        [SerializeField] private int t_max_saut = 2;
+        [SerializeField] private int t_max_saut = 2;                        // The time in seconds from which the maximum amount of Jump Force is reached 
 
         private Transform m_GroundCheck;    // A position marking where to check if the player is grounded.
         const float k_GroundedRadius = .2f; // Radius of the overlap circle to determine if grounded
@@ -92,7 +92,7 @@ namespace UnityStandardAssets._2D
                     Flip();
                 }
             }
-            // Duration: en seconde, si depasse 4s, maximum, 
+            // Duration: en secondes, si on depasse t_max_saut en s, on reste au maximum de saut, 
             if (duration>=t_max_saut){
                 duration=t_max_saut;
             }
