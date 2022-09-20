@@ -20391,7 +20391,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_MoveForce: 50
   m_MaxSpeed: 10
+  m_WallSpeed: -1
   m_JumpForce: 800
+  m_MaxJumpForce: 1600
   m_CrouchSpeed: 0.25
   m_AirControl: 1
   m_WhatIsGround:
@@ -20401,6 +20403,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   m_MaxJumps: 2
+  m_TMaxSaut: 2
 --- !u!50 &920846918
 Rigidbody2D:
   serializedVersion: 4
@@ -45721,7 +45724,7 @@ Camera:
   far clip plane: 5000
   field of view: 60
   orthographic: 1
-  orthographic size: 4.5
+  orthographic size: 6
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2

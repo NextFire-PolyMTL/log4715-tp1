@@ -9,14 +9,14 @@ namespace UnityStandardAssets._2D
         [SerializeField] private float m_MoveForce = 50f;                   // Amount of force added to move the player left and right.
         [SerializeField] private float m_MaxSpeed = 10f;                    // The fastest the player can travel in the x axis.
         [SerializeField] private float m_WallSpeed = -1f;                   // The fastest the player can travel in the y axis on a wall.
-        [SerializeField] private float m_JumpForce = 400f;                  // Amount of force added when the player jumps.
-        [SerializeField] private float m_JumpForce_max = 800f;              // Max amount of force added when the player jumps.
+        [SerializeField] private float m_JumpForce = 800f;                  // Amount of force added when the player jumps.
+        [SerializeField] private float m_MaxJumpForce = 1600f;              // Max amount of force added when the player jumps.
         [Range(0, 1)][SerializeField] private float m_CrouchSpeed = .36f;   // Amount of maxSpeed applied to crouching movement. 1 = 100%
         [SerializeField] private bool m_AirControl = false;                 // Whether or not a player can steer while jumping;
         [SerializeField] private LayerMask m_WhatIsGround;                  // A mask determining what is ground to the character
         [SerializeField] private LayerMask m_WhatIsWall;                    // A mask determining what is wall to the character
         [SerializeField] private int m_MaxJumps = 1;                        // The maximum number of jumps the player can do in the air
-        [SerializeField] private int t_max_saut = 2;                        // The time in seconds from which the maximum amount of Jump Force is reached 
+        [SerializeField] private int m_TMaxSaut = 2;                        // The time in seconds from which the maximum amount of Jump Force is reached
 
         private Transform m_GroundCheck;    // A position marking where to check if the player is grounded.
         const float k_GroundedRadius = .2f; // Radius of the overlap circle to determine if grounded
@@ -92,29 +92,22 @@ namespace UnityStandardAssets._2D
                     Flip();
                 }
             }
-            // Duration: en secondes, si on depasse t_max_saut en s, on reste au maximum de saut, 
-            if (duration>=t_max_saut){
-                duration=t_max_saut;
-            }
-            duration=duration/t_max_saut;
-            float test=0;
-            if (move==true){
-                test=1;
-            }
-            float jumpForce_variable;
-            jumpForce_variable = duration * m_JumpForce_max + (1 - duration) * m_JumpForce;
+
+            // Duration: en secondes, si on depasse m_TMaxSaut en s, on reste au maximum de saut,
+            duration = Mathf.Min(duration, m_TMaxSaut);
+            float durationRatio = duration / m_TMaxSaut;
+            float jumpForce = Mathf.Max(durationRatio * m_MaxJumpForce, m_JumpForce);
             if (m_Grounded)
             {
-                m_Rigidbody2D.AddForce(new Vector2(0f, test * jumpForce_variable));
+                int test = move ? 1 : 0;
+                m_Rigidbody2D.AddForce(new Vector2(0f, test * jumpForce));
             }
-
-            //m_Rigidbody2D.AddForce(new Vector2(0f, 100f)); //test*(m_JumpForce*(1-duration)+m_JumpForce_max*duration
         }
 
 
         public void Move(float move, bool crouch, bool jump)
         {
-            
+
             // If crouching, check to see if the character can stand up
             if (!crouch && m_Anim.GetBool("Crouch"))
             {
@@ -139,7 +132,7 @@ namespace UnityStandardAssets._2D
 
                 // Limit the speed of the character
                 float x_vel = Mathf.Clamp(m_Rigidbody2D.velocity.x, -m_MaxSpeed, m_MaxSpeed);
-                float y_vel = m_Walled && move!=0 ? Mathf.Max(m_WallSpeed, m_Rigidbody2D.velocity.y) : m_Rigidbody2D.velocity.y;
+                float y_vel = (m_Walled && move != 0) ? Mathf.Max(m_WallSpeed, m_Rigidbody2D.velocity.y) : m_Rigidbody2D.velocity.y;
                 m_Rigidbody2D.velocity = new Vector2(x_vel, y_vel);
 
                 // The Speed animator parameter is set to the absolute value of the horizontal input.
