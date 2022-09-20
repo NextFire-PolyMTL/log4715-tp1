@@ -10,11 +10,13 @@ namespace UnityStandardAssets._2D
         [SerializeField] private float m_MaxSpeed = 10f;                    // The fastest the player can travel in the x axis.
         [SerializeField] private float m_WallSpeed = -1f;                   // The fastest the player can travel in the y axis on a wall.
         [SerializeField] private float m_JumpForce = 400f;                  // Amount of force added when the player jumps.
+        [SerializeField] private float m_JumpForce_max = 800f;              // Max amount of force added when the player jumps.
         [Range(0, 1)][SerializeField] private float m_CrouchSpeed = .36f;   // Amount of maxSpeed applied to crouching movement. 1 = 100%
         [SerializeField] private bool m_AirControl = false;                 // Whether or not a player can steer while jumping;
         [SerializeField] private LayerMask m_WhatIsGround;                  // A mask determining what is ground to the character
         [SerializeField] private LayerMask m_WhatIsWall;                    // A mask determining what is wall to the character
         [SerializeField] private int m_MaxJumps = 1;                        // The maximum number of jumps the player can do in the air
+        [SerializeField] private int t_max_saut = 2;
 
         private Transform m_GroundCheck;    // A position marking where to check if the player is grounded.
         const float k_GroundedRadius = .2f; // Radius of the overlap circle to determine if grounded
@@ -64,6 +66,49 @@ namespace UnityStandardAssets._2D
                 if (colliders2[i].gameObject != gameObject)
                     m_Walled = true;
             }
+        }
+
+
+        public void Move2(float move2, bool move, float duration)
+        {
+            if (m_Grounded || m_AirControl)
+            {
+                // The Speed animator parameter is set to the absolute value of the horizontal input.
+                m_Anim.SetFloat("Speed", Mathf.Abs(move2));
+
+                // Move the character
+                m_Rigidbody2D.velocity = new Vector2(move2 * m_MaxSpeed, m_Rigidbody2D.velocity.y);
+
+                // If the input is moving the player right and the player is facing left...
+                if (move2 > 0 && !m_FacingRight)
+                {
+                    // ... flip the player.
+                    Flip();
+                }
+                // Otherwise if the input is moving the player left and the player is facing right...
+                else if (move2 < 0 && m_FacingRight)
+                {
+                    // ... flip the player.
+                    Flip();
+                }
+            }
+            // Duration: en seconde, si depasse 4s, maximum, 
+            if (duration>=t_max_saut){
+                duration=t_max_saut;
+            }
+            duration=duration/t_max_saut;
+            float test=0;
+            if (move==true){
+                test=1;
+            }
+            float jumpForce_variable;
+            jumpForce_variable = duration * m_JumpForce_max + (1 - duration) * m_JumpForce;
+            if (m_Grounded)
+            {
+                m_Rigidbody2D.AddForce(new Vector2(0f, test * jumpForce_variable));
+            }
+
+            //m_Rigidbody2D.AddForce(new Vector2(0f, 100f)); //test*(m_JumpForce*(1-duration)+m_JumpForce_max*duration
         }
 
 
