@@ -22,7 +22,12 @@ namespace UnityStandardAssets.Cameras
         private float m_CurrentTurnAmount; // How much to turn the camera
         private float m_TurnSpeedVelocityChange; // The change in the turn speed velocity
         private Vector3 m_RollUp = Vector3.up;// The roll of the camera around the z axis ( generally this will always just be up )
+        [SerializeField] public GameObject character;
 
+        [SerializeField] private Transform m_GroundCheck;    // A position marking where to check if the player is grounded.
+        const float k_GroundedRadius = .2f; // Radius of the overlap circle to determine if grounded
+        private bool m_Grounded;            // Whether or not the player is grounded.
+        [SerializeField] private LayerMask m_WhatIsGround;
 
         protected override void FollowTarget(float deltaTime)
         {
@@ -84,8 +89,30 @@ namespace UnityStandardAssets.Cameras
                 m_LastFlatAngle = currentFlatAngle;
             }
 
-            // camera position moves towards target position:
+
+
+
+            m_Grounded = false;
+
+            // The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
+            // This can be done using layers instead but Sample Assets will not overwrite your project settings.
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, k_GroundedRadius, m_WhatIsGround);
+            for (int i = 0; i < colliders.Length; i++)
+            {
+                if (colliders[i].gameObject != gameObject)
+                    m_Grounded = true;
+            }
+
+             // camera position moves towards target position:
+            if(m_Grounded){
             transform.position = Vector3.Lerp(transform.position, m_Target.position, deltaTime*m_MoveSpeed);
+            }else{
+            transform.position = Vector3.Lerp(transform.position,new Vector3(m_Target.position.x, transform.position.y, transform.position.z), deltaTime*m_MoveSpeed);
+
+            }
+            /*var output = JsonUtility.ToJson(character, true);
+            Debug.Log(output);
+            */
 
             // camera's rotation is split into two parts, which can have independend speed settings:
             // rotating towards the target's forward direction (which encompasses its 'yaw' and 'pitch')
@@ -103,5 +130,6 @@ namespace UnityStandardAssets.Cameras
             m_RollUp = m_RollSpeed > 0 ? Vector3.Slerp(m_RollUp, targetUp, m_RollSpeed*deltaTime) : Vector3.up;
             transform.rotation = Quaternion.Lerp(transform.rotation, rollRotation, m_TurnSpeed*m_CurrentTurnAmount*deltaTime);
         }
+
     }
 }
