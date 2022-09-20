@@ -151,31 +151,41 @@ namespace UnityStandardAssets._2D
                     Flip();
                 }
             }
+
             // If the player should jump...
             if (jump)
             {
+                // Log m_Walled and m_Grounded
+                Debug.Log("m_Walled: " + m_Walled + " m_Grounded: " + m_Grounded);
+
                 // And if the player is grounded, reset the number of jumps left
                 if (m_Grounded && m_Anim.GetBool("Ground"))
                 {
-                    m_Grounded = false;
                     m_Anim.SetBool("Ground", false);
                     m_JumpsLeft = m_MaxJumps;
                 }
+
                 if (m_Walled && !m_Grounded)
                 {
+                    Debug.Log("Wall jump");
                     m_Rigidbody2D.AddForce(m_JumpForce * new Vector2(m_FacingRight ? -1 : 1, 1));
                     Flip();
-
+                    m_JumpsLeft = m_MaxJumps;
                 }
-                // If the player has jumps left...
                 else if (m_JumpsLeft > 0)
                 {
+                    Debug.Log("Classic jump");
                     // Reset y velocity
                     m_Rigidbody2D.velocity = new Vector2(m_Rigidbody2D.velocity.x, 0);
                     // Add a vertical force to the player.
                     m_Rigidbody2D.AddForce(Vector2.up * m_JumpForce);
                     // Decrement the number of jumps left
                     m_JumpsLeft--;
+                    Debug.Log("Jumps left: " + m_JumpsLeft);
+                }
+                else
+                {
+                    Debug.Log("No jump");
                 }
             }
         }
