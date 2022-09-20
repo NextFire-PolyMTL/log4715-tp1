@@ -69,6 +69,7 @@ namespace UnityStandardAssets._2D
 
         public void Move(float move, bool crouch, bool jump)
         {
+            
             // If crouching, check to see if the character can stand up
             if (!crouch && m_Anim.GetBool("Crouch"))
             {
@@ -93,7 +94,7 @@ namespace UnityStandardAssets._2D
 
                 // Limit the speed of the character
                 float x_vel = Mathf.Clamp(m_Rigidbody2D.velocity.x, -m_MaxSpeed, m_MaxSpeed);
-                float y_vel = m_Walled ? Mathf.Max(m_WallSpeed, m_Rigidbody2D.velocity.y) : m_Rigidbody2D.velocity.y;
+                float y_vel = m_Walled && move!=0 ? Mathf.Max(m_WallSpeed, m_Rigidbody2D.velocity.y) : m_Rigidbody2D.velocity.y;
                 m_Rigidbody2D.velocity = new Vector2(x_vel, y_vel);
 
                 // The Speed animator parameter is set to the absolute value of the horizontal input.
